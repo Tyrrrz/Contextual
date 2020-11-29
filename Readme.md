@@ -8,7 +8,7 @@
 
 **Project status: active**.
 
-Simple effect system using stacked contexts powered by `AsyncLocal`. Inspired by React's [Context API](https://reactjs.org/docs/context.html).
+Contextual offers a simple foundation to safely provide and consume implicit parameters using stacked contexts and `AsyncLocal`. Inspired by React's [Context API](https://reactjs.org/docs/context.html).
 
 ## Download
 
