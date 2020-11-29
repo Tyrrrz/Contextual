@@ -18,6 +18,15 @@ namespace Contextual.Tests
         public void Dispose() => IsDisposed = true;
     }
 
+    public class MyOtherContext : Context
+    {
+        public int Value { get; }
+
+        public MyOtherContext(int value) => Value = value;
+
+        public MyOtherContext() : this(0) {}
+    }
+
     public class MainSpecs
     {
         [Fact]
@@ -56,6 +65,20 @@ namespace Contextual.Tests
                         ctx3.Value.Should().Be("baz");
                     }
                 }
+            }
+        }
+
+        [Fact]
+        public void Retrieving_context_returns_an_instance_of_the_requested_type()
+        {
+            using (Context.Provide(new MyContext("foo")))
+            using (Context.Provide(new MyOtherContext(13)))
+            using (Context.Provide(new MyContext("bar")))
+            using (Context.Provide(new MyOtherContext(24)))
+            using (Context.Provide(new MyContext("baz")))
+            {
+                var ctx = Context.Use<MyOtherContext>();
+                ctx.Value.Should().Be(24);
             }
         }
 
