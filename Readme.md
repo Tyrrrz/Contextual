@@ -8,7 +8,7 @@
 
 **Project status: active**.
 
-Contextual offers a simple foundation to safely provide and consume implicit parameters using stacked contexts and `AsyncLocal`. Inspired by React's [Context API](https://reactjs.org/docs/context.html).
+Contextual offers a simple foundation to provide and consume implicit parameters using stacked contexts. Inspired by React's [Context API](https://reactjs.org/docs/context.html).
 
 ## Download
 
@@ -16,13 +16,11 @@ Contextual offers a simple foundation to safely provide and consume implicit par
 
 ## Usage
 
-Contextual allows you to establish _contexts_ for operations nested in the callstack. You can think of it as something conceptually similar to throwing and catching exceptions, but in the opposite direction. Contexts are provided above in the callstack and consumed from below.
-
-In essence, defining contexts allows you to provide _implicit parameters_ to your methods. This enables many different use cases.
+Contextual allows you to establish _contexts_ for operations nested in the callstack. Contexts are somewhat similar to exceptions, but instead of being thrown below in the callstack and caught by callers above, they are provided above in the callstack and consumed from below. Using contexts, you can essentially pass implicit parameters, which enables a number of interesting use cases.
 
 ### Providing and using contexts
 
-To define a context, create a class that inherits from `Context`:
+To define a context, just create a class that inherits from `Context`:
 
 ```csharp
 class MyContext : Context
@@ -37,7 +35,7 @@ class MyContext : Context
 }
 ```
 
-Now you can provide and consume the context inside the callstack:
+Then, to consume the nearest instance of `MyContext`, call `Context.Use<MyContext>()`:
 
 ```csharp
 void PrintValue()
@@ -45,7 +43,11 @@ void PrintValue()
     var ctx = Context.Use<MyContext>();
     Console.WriteLine(ctx.Value);
 }
+```
 
+Finally, to provide a specific instance of the context, call `Context.Provide(...)`:
+
+```
 void Main()
 {
     using (Context.Provide(new MyContext("Hello world!"))
@@ -57,9 +59,9 @@ void Main()
 }
 ```
 
-In order to be consumed, your context class must also provide a parameterless constructor. That constructor is invoked to create a fallback instance of the context, when none has been explicitly provided. This also means that calling `Context.Use<T>()` is guaranteed to always return a valid, non-null instance of the context.
+Note, that in order to be consumed, your context class must also provide a parameterless constructor, which is a rule enforced by the generic constraints. That constructor is invoked to create a fallback instance of the context, when none has been explicitly provided. This, in turn, means that calling `Context.Use<T>()` is always guaranteed to return a valid, non-null instance of the context, even if it hasn't been provided.
 
-Provided contexts are arranged on a stack, with the nearest instance being the one returned to the caller:
+Provided contexts are grouped by type and arranged in a stack. When you call `Context.Use<T>()`, you get the nearest available instance:
 
 ```csharp
 using (Context.Provide(new MyContext("foo")))
@@ -82,7 +84,9 @@ using (Context.Provide(new MyContext("foo")))
 }
 ```
 
-Contexts are also correctly persisted between threads inside asynchronous workflows:
+It's important to wrap the context scope in a `using` statement, as the `Dispose()` method is responsible for poping the context off the stack. Additionally, if the context itself implements `IDisposable`, it will be called as well, so you don't have to do it separately.
+
+The underlying implementation uses `AsyncLocal` to synchronize stacks between threads, so contexts should be correctly persisted in asynchronous workflows:
 
 ```csharp
 async Task PrintValueAsync()
@@ -121,11 +125,11 @@ async Task ContextualAsync()
 }
 ```
 
-### Using contexts for cancellation
+### Example: using contexts for cancellation
 
 Among other things, contexts can be useful for propagating cancellation signals. Instead of routinely passing `CancellationToken` as parameter to every nested method, we can simply establish an ambient context.
 
-To do that, we need to create a cancellation context:
+To do that, we can create a simple cancellation context:
 
 ```csharp
 class CancellationContext : Context
@@ -139,7 +143,9 @@ class CancellationContext : Context
 }
 ```
 
-And then make use of it like shown below:
+> Note, Contextual already comes with an implementation of `CancellationContext` built-in. The above is just for reference.
+
+And then make use of it as shown below:
 
 ```csharp
 HttpClient _httpClient = new HttpClient();
@@ -149,14 +155,15 @@ async Task DoSomething()
     // Retrieve cancellation implicitly
     var cancellation = Context.Use<CancellationContext>();    
 
-    // Will abort if the token is triggered
+    // Will abort the request if the token is triggered
     using var request = new HttpRequestMessage(HttpMethod.Post, "...");
-    await _httpClient.SendAsync(request, cancellation.Token);
+    using var response = await _httpClient.SendAsync(request, cancellation.Token);
+    
+    // ...
 }
 
 async Task Main()
 {
-    // Timeout of 5 seconds
     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
     using (Context.Provide(new CancellationContext(cts.Token)))
@@ -167,9 +174,7 @@ async Task Main()
 }
 ```
 
-Note: Contextual provides an implementation of `CancellationContext` out of the box, so you don't have to create it yourself.
-
-### Using contexts for logging
+### Example: using contexts for logging
 
 Similarly, contexts can also be used for abstract logging:
 
@@ -206,9 +211,9 @@ void Main()
 }
 ```
 
-### Using contexts for non-deterministic inputs
+### Example: using contexts for non-deterministic inputs
 
-You can use contexts to model non-deterministic inputs, such as for example current system time:
+You can use contexts to model non-deterministic inputs, such as, for example, current system time:
 
 ```csharp
 class DateTimeContext : Context
@@ -242,11 +247,13 @@ void Main()
 }
 ```
 
-### Using contexts for dependency injection
+### Example: using contexts for dependency injection
 
-As with other types of implicit parameters, contexts can be used as a means to achieve dependency injection:
+Similarly, contexts can be used as a way to facilitate dependency injection:
 
 ```csharp
+// Uses Microsoft.Extensions.DependencyInjection container, but can also
+// be implemented in any other way.
 class DependencyContainerContext : Context
 {
     public IServiceProvider Services { get; }
