@@ -86,7 +86,8 @@ namespace Contextual.Tests
         public void Disposing_the_context_scope_renders_it_unavailable()
         {
             using (Context.Provide(new MyContext("foo")))
-            {}
+            {
+            }
 
             var ctx = Context.Use<MyContext>();
             ctx.Value.Should().Be("default");
@@ -99,7 +100,8 @@ namespace Contextual.Tests
             ctx.IsDisposed.Should().BeFalse();
 
             using (Context.Provide(ctx))
-            {}
+            {
+            }
 
             ctx.IsDisposed.Should().BeTrue();
         }
@@ -115,19 +117,19 @@ namespace Contextual.Tests
 
             async Task<MyContext> SetFooAndGetContextAsync()
             {
-                await Task.Delay(10).ConfigureAwait(false);
                 using (Context.Provide(new MyContext("foo")))
                 {
-                    return await GetContextAsync().ConfigureAwait(false);;
+                    await Task.Delay(10).ConfigureAwait(false);
+                    return await GetContextAsync().ConfigureAwait(false);
                 }
             }
 
             async Task<MyContext> SetBarAndGetContextAsync()
             {
-                await Task.Delay(10).ConfigureAwait(false);
                 using (Context.Provide(new MyContext("bar")))
                 {
-                    return await GetContextAsync().ConfigureAwait(false);;
+                    await Task.Delay(10).ConfigureAwait(false);
+                    return await GetContextAsync().ConfigureAwait(false);
                 }
             }
 

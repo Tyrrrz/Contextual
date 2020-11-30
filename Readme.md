@@ -95,20 +95,18 @@ async Task PrintValueAsync()
 
 async Task SetFooAndPrintValueAsync()
 {
-    await Task.Delay(10);
-
     using (Context.Provide(new MyContext("foo")))
     {
+        await Task.Delay(10);
         await PrintValueAsync();
     }
 }
 
 async Task SetBarAndPrintValueAsync()
 {
-    await Task.Delay(10);
-
     using (Context.Provide(new MyContext("bar")))
     {
+        await Task.Delay(10);
         await PrintValueAsync();
     }
 }
