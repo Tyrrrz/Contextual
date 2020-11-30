@@ -3,7 +3,7 @@
 namespace Contextual.Contexts
 {
     /// <summary>
-    /// Provides ambient cancellation.
+    /// Provides context for ambient cancellation.
     /// </summary>
     public class CancellationContext : Context
     {
