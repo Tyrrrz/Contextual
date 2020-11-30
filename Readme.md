@@ -121,7 +121,7 @@ async Task ContextualAsync()
     var barTask = SetBarAndPrintValueAsync();
 
     // Prints "foo" and "bar"
-    await Task.WhenAll(fooTask, barTask).ConfigureAwait(false);
+    await Task.WhenAll(fooTask, barTask);
 }
 ```
 
