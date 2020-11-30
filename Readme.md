@@ -50,7 +50,7 @@ Finally, to provide a specific instance of the context, call `Context.Provide(..
 ```csharp
 void Main()
 {
-    using (Context.Provide(new MyContext("Hello world!"))
+    using (Context.Provide(new MyContext("Hello world!")))
     {
         PrintValue(); // prints "Hello world!" to the console
     }
