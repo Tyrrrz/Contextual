@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Contextual.Internal;
 
 namespace Contextual
@@ -43,5 +44,19 @@ namespace Contextual
             ContextStack.Of<T>().TryPeek(out var context)
                 ? context
                 : new T();
+    }
+
+    public partial class Context
+    {
+        private static class ContextStack
+        {
+            private static class Container<T> where T : Context
+            {
+                public static AsyncLocal<Stack<T>?> Stack { get; } = new AsyncLocal<Stack<T>?>();
+            }
+
+            public static Stack<T> Of<T>() where T : Context =>
+                Container<T>.Stack.Value ??= new Stack<T>();
+        }
     }
 }
