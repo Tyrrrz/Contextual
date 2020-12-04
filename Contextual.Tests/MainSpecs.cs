@@ -136,6 +136,9 @@ namespace Contextual.Tests
             var fooTask = SetFooAndGetContextAsync();
             var barTask = SetBarAndGetContextAsync();
 
+            var ctx = await GetContextAsync().ConfigureAwait(false);
+            ctx.Value.Should().Be("default");
+
             await Task.WhenAll(fooTask, barTask).ConfigureAwait(false);
 
             fooTask.Result.Value.Should().Be("foo");
