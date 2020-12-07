@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using Contextual.Internal;
 
@@ -25,12 +24,12 @@ namespace Contextual
         /// </remarks>
         public static IDisposable Provide<T>(T context) where T : Context
         {
-            var stack = ContextStack.Of<T>();
-            stack.Push(context);
+            var previous = Container<T>.Current.Value;
+            Container<T>.Current.Value = context;
 
             return Disposable.Create(() =>
             {
-                stack.TryPop(out _);
+                Container<T>.Current.Value = previous;
                 (context as IDisposable)?.Dispose();
             });
         }
@@ -41,22 +40,14 @@ namespace Contextual
         /// parameterless constructor on the class.
         /// </summary>
         public static T Use<T>() where T : Context, new() =>
-            ContextStack.Of<T>().TryPeek(out var context)
-                ? context
-                : new T();
+            Container<T>.Current.Value ?? new T();
     }
 
     public partial class Context
     {
-        private static class ContextStack
+        private static class Container<T> where T : Context
         {
-            private static class Container<T> where T : Context
-            {
-                public static AsyncLocal<Stack<T>?> Stack { get; } = new AsyncLocal<Stack<T>?>();
-            }
-
-            public static Stack<T> Of<T>() where T : Context =>
-                Container<T>.Stack.Value ??= new Stack<T>();
+            public static AsyncLocal<T?> Current { get; } = new AsyncLocal<T?>();
         }
     }
 }
