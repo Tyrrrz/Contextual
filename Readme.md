@@ -6,7 +6,7 @@
 [![Downloads](https://img.shields.io/nuget/dt/Contextual.svg)](https://nuget.org/packages/Contextual)
 [![Donate](https://img.shields.io/badge/donate-$$$-purple.svg)](https://tyrrrz.me/donate)
 
-**Project status: active**.
+✅ **Project status: active**.
 
 Contextual offers a simple foundation to provide and consume implicit parameters using stacked contexts. Inspired by React's [Context API](https://reactjs.org/docs/context.html).
 
