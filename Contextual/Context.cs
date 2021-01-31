@@ -17,7 +17,7 @@ namespace Contextual
         /// Provides context to nested operations by creating a scope.
         ///
         /// Disposing the scope pops the context from the stack, rendering it unavailable.
-        /// If the context implements <see cref="IDisposable"/>, its own <see cref="IDisposable.Dispose"/> method is also invoked.
+        /// If the context implements <see cref="IDisposable"/>, its own <see cref="IDisposable.Dispose"/> method is invoked as well.
         /// </summary>
         /// <remarks>
         /// Remember to wrap the return of this method in a <code>using</code> statement!
@@ -30,6 +30,9 @@ namespace Contextual
             return Disposable.Create(() =>
             {
                 Container<T>.Current.Value = previous;
+
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                // Dispose the context if it can be disposed.
                 (context as IDisposable)?.Dispose();
             });
         }
@@ -47,7 +50,7 @@ namespace Contextual
     {
         private static class Container<T> where T : Context
         {
-            public static AsyncLocal<T?> Current { get; } = new AsyncLocal<T?>();
+            public static AsyncLocal<T?> Current { get; } = new();
         }
     }
 }
