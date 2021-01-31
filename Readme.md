@@ -279,6 +279,8 @@ class DateTimeContext : Context
 }
 ```
 
+Then, depending on the environment:
+
 ```csharp
 void PrintCurrentDate()
 {

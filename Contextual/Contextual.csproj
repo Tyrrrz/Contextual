@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
     <Authors>$(Company)</Authors>
-    <Description>Implementation of an effect system via contexts for .NET</Description>
+    <Description>Library for threading implicit parameters through method call chains</Description>
     <PackageTags>context stack dependency injection effect functional react</PackageTags>
     <PackageProjectUrl>https://github.com/Tyrrrz/Contextual</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/Tyrrrz/Contextual/blob/master/Changelog.md</PackageReleaseNotes>
