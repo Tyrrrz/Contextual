@@ -110,12 +110,12 @@ using (Context.Provide(new MyContext("foo")))
 Context are also stacked separately depending on their type, so you can easily compose them:
 
 ```csharp
-using (Context.Provide(new FooContext("foo")
+using (Context.Provide(new FooContext("foo")))
 {
     // This context is of a different type, so it's persisted on a separate stack
-    using (Context.Provide(new BarContext(42))
+    using (Context.Provide(new BarContext(42)))
     {
-        using (Context.Provide(new FooContext("baz"))
+        using (Context.Provide(new FooContext("baz")))
         {
             var fooCtx = Context.Use<FooContext>(); // will resolve FooContext("baz")
             var barCtx = Context.Use<BarContext>(); // will resolve BarContext(42)
@@ -333,6 +333,8 @@ class DependencyContainerContext : Context
 }
 ```
 
+And to use it:
+
 ```csharp
 void DoSomething()
 {
@@ -359,7 +361,7 @@ void Test()
     serviceCollection.AddSingleton<IDependency, FakeDependency>();
     var serviceProvider = serviceCollection.BuildServiceProvider();
 
-    using (Context.Provide(serviceProvider))
+    using (Context.Provide(new DependencyContainerContext(serviceProvider)))
     {
         // Uses fake dependencies
         DoSomething();
