@@ -5,17 +5,13 @@ using Xunit;
 
 namespace Contextual.Tests
 {
-    public class MyContext : Context, IDisposable
+    public class MyContext : Context
     {
-        public bool IsDisposed { get; private set; }
-
         public string Value { get; }
 
         public MyContext(string value) => Value = value;
 
         public MyContext() : this("default") {}
-
-        public void Dispose() => IsDisposed = true;
     }
 
     public class MyOtherContext : Context
