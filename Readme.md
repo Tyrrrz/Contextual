@@ -63,7 +63,7 @@ void PrintValue()
 }
 ```
 
-Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere above in the call chain above `PrintValue()`:
+Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere in the call chain that leads to `PrintValue()`:
 
 ```csharp
 void Main()
