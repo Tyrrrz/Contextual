@@ -8,7 +8,7 @@
 
 ✅ **Project status: active**.
 
-Contextual is a library that allows threading contextual information through call stacks.
+Contextual is a library that helps share data between operations executing on the same callstack.
 It offers a robust and easily testable way to facilitate _implicit parameters_ in your code.
 
 Inspired by React's [Context API](https://reactjs.org/docs/context.html), which uses a similar approach for threading contextual data through component hierarchies.
@@ -19,9 +19,7 @@ Inspired by React's [Context API](https://reactjs.org/docs/context.html), which 
 
 ## Usage
 
-This library allows you to establish _contexts_ for operations nested in the callstack.
-With the help of contexts you can pass implicit parameters to methods, enabling a number of quite interesting use cases.
-
+This library allows you to establish _contexts_, which encapsulate data (or state) that can be provided and consumed on the callstack.
 Contexts are somewhat similar to exceptions in the sense that they can implicitly move through the callstack, but instead of being thrown from below and caught from above, they are provided from above and consumed from below.
 
 ### Providing and using contexts
@@ -42,10 +40,10 @@ class MyContext : Context
 }
 ```
 
-This class has two constructors, one which initializes `Value` based on the given parameter and another parameterless constructor that sets it to `"default"`.
-The latter is a requirement because, by design, at least one instance of the context must be accessible at all times, and, if it hasn't been explicitly provided, the library will use the parameterless constructor to create a default fallback instance.
+This class has two constructors: one which initializes `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
+The first constructor will be used when we need to create an instance of the context normally, while the second (parameterless) one is required so that the library can create a fallback instance in case we don't provide one explicitly.
 
-Note that although you can technically define a context class that does not have a parameterless constructor, you won't actually be able to use it as `Context.Use<T>(...)` has a generic constraint that enforces the presence of the constructor in the definition.
+> Note that although forgetting to include the parameterless constructor will not raise a compilation error on the class definition itself, it will raise one when calling `Context.Use<T>(...)` thanks to a generic constraint that requires it.
 
 Then, in a method that is meant to depend on this context, call `Context.Use<MyContext>()` to resolve the nearest instance on the stack:
 
@@ -65,8 +63,7 @@ void PrintValue()
 }
 ```
 
-
-Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere above in the stack:
+Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere above in the call chain above `PrintValue()`:
 
 ```csharp
 void Main()
@@ -107,7 +104,7 @@ using (Context.Provide(new MyContext("foo")))
 }
 ```
 
-Context are also stacked separately depending on their type, so you can easily compose them:
+Context are also stacked separately depending on their type, so you can easily compose them as well:
 
 ```csharp
 using (Context.Provide(new FooContext("foo")))
