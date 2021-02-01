@@ -41,11 +41,11 @@ class MyContext : Context
 ```
 
 This class has two constructors: one which sets `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
-The first constructor will be used when we need to initialize the context normally, while the second (parameterless) constructor is going to be called by the library to create a fallback in case we don't provide an instance explicitly.
+By design, there must always be a valid instance of the context available on the callstack, so if one has not been explicitly provided, the library will use the parameterless constructor to initialize it.
 
-> Note that although forgetting to include the parameterless constructor will not raise a compilation error on the class definition itself, it will raise one when calling `Context.Use<T>(...)` thanks to a generic constraint that requires it.
+> Note that although forgetting to include the parameterless constructor will not raise a compilation error on the class definition itself, it will raise one when calling `Context.Use<T>(...)` later, thanks to a generic constraint that requires it.
 
-Then, in a method that depends on our context, call `Context.Use<MyContext>()` to resolve the nearest available instance:
+Then, in a method which is meant to depend on this context, call `Context.Use<MyContext>()` to resolve the nearest available instance:
 
 ```csharp
 void PrintValue()
@@ -79,8 +79,8 @@ void Main()
 }
 ```
 
-Note that calling `Context.Provide(...)` returns an `IDisposable`.
-It's very important to wrap it in a `using` statement because its `Dispose()` method is responsible for popping the current instance off the stack.
+Calling `Context.Provide(...)` pushes a new instance of the context on the stack, which makes it available to nested operations.
+Note that this returns an `IDisposable` which you must wrap in a `using` statement to ensure that the context gets resets to the previous instance at the end of the block.
 
 When dealing with multiple provided contexts of the same type, `Context.Use<T>()` always resolves the instance which is nearest on the callstack.
 Essentially, providing a new context temporarily shadows the previous instance:
@@ -106,7 +106,7 @@ using (Context.Provide(new MyContext("foo")))
 }
 ```
 
-Moreover, contexts are persisted on different stacks depending on their type. An operation may depend on contexts of multiple types at the same time:
+Additionally, contexts are persisted on different stacks depending on their type. A single operation may depend on contexts of multiple types simultaneously:
 
 ```csharp
 using (Context.Provide(new FooContext("foo")))
@@ -170,7 +170,7 @@ async Task ContextualAsync()
 Contexts are generally very useful for propagating infrastructural concerns across long chain of method calls.
 One such example is propagating cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, we can simply establish a shared context.
 
-To do that, we need to create a context that encapsulates a cancellation token:
+To do that, create a context that encapsulates a cancellation token:
 
 ```csharp
 class CancellationContext : Context
@@ -216,11 +216,11 @@ async Task Main()
 }
 ```
 
-> Note, Contextual already comes with an implementation of `CancellationContext` built-in. The example above is just for reference.
+> Note, Contextual already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own. The example above is just for reference.
 
 ### Example: using contexts for logging
 
-Similarly, contexts can also be used for a logging implementation which does not require passing `ILogger` around:
+Similarly, contexts can also be used for a logging implementation that does not require passing `ILogger` around:
 
 ```csharp
 class LogContext : Context
