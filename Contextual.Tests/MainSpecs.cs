@@ -94,19 +94,6 @@ namespace Contextual.Tests
         }
 
         [Fact]
-        public void Disposing_the_context_scope_of_a_context_that_implements_IDisposable_also_calls_its_Dispose_method()
-        {
-            var ctx = new MyContext("foo");
-            ctx.IsDisposed.Should().BeFalse();
-
-            using (Context.Provide(ctx))
-            {
-            }
-
-            ctx.IsDisposed.Should().BeTrue();
-        }
-
-        [Fact]
         public async Task Context_stack_is_correctly_preserved_in_asynchronous_workflows()
         {
             async Task<MyContext> GetContextAsync()
