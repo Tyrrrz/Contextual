@@ -63,7 +63,7 @@ void PrintValue()
 }
 ```
 
-Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere in the call chain that leads to `PrintValue()`:
+Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere in the chain that leads to `PrintValue()`:
 
 ```csharp
 void Main()
@@ -165,12 +165,10 @@ async Task ContextualAsync()
 
 ### Example: using contexts for cancellation
 
-Contexts are generally useful for propagating infrastructural concerns across long chain of method calls.
+Contexts are generally very useful for propagating infrastructural concerns across long chain of method calls.
 One such example is propagating cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, we can simply establish a shared context.
 
 To do that, we need to create a context that encapsulates a cancellation token:
-
-> Note, Contextual already comes with an implementation of `CancellationContext` built-in. The example below is shown just for reference.
 
 ```csharp
 class CancellationContext : Context
@@ -191,12 +189,11 @@ HttpClient _httpClient = new HttpClient();
 
 async Task DoSomething()
 {
-    // Retrieve cancellation implicitly.
-    // If it hasn't been provided, we simply don't cancel.
+    // Retrieve cancellation implicitly
+    // (if it hasn't been provided, we get a default value with an empty token)
     var cancellation = Context.Use<CancellationContext>();    
 
-    // Will abort the request if the cancellation was
-    // requested from upstream.
+    // Abort the request if the cancellation was requested upstream
     using var request = new HttpRequestMessage(HttpMethod.Post, "...");
     using var response = await _httpClient.SendAsync(request, cancellation.Token);
     
@@ -216,6 +213,8 @@ async Task Main()
     }
 }
 ```
+
+> Note, Contextual already comes with an implementation of `CancellationContext` built-in. The example above is just for reference.
 
 ### Example: using contexts for logging
 
@@ -259,7 +258,7 @@ void Main()
 Normally, non-deterministic inputs can be quite difficult to test.
 For example, when dealing with the current system time, a common approach is to establish some kind of `IDateTimeProvider` abstraction that has two implementations: a real one for production usage and a fake one that allows us to substitute a constant value for testing purposes.
 
-On the other hand, contexts offer us a much simpler solution to that problem:
+Instead, contexts offer us a much simpler solution to that problem:
 
 ```csharp
 class DateTimeContext : Context
@@ -275,8 +274,6 @@ class DateTimeContext : Context
     public DateTimeOffset GetNow() => _override ?? DateTimeOffset.Now;
 }
 ```
-
-Then, depending on the environment:
 
 ```csharp
 void PrintCurrentDate()
@@ -303,7 +300,7 @@ void Test()
 
 ### Example: using contexts for dependency injection
 
-Analogically to the case with non-deterministic inputs, we can also utilize this approach to facilitate dependency injection:
+We can also utilize this approach to facilitate dependency injection:
 
 ```csharp
 // This implementation uses Microsoft.Extensions.DependencyInjection container,
@@ -331,8 +328,6 @@ class DependencyContainerContext : Context
     }
 }
 ```
-
-And to use it:
 
 ```csharp
 void DoSomething()
