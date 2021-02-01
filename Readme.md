@@ -79,7 +79,7 @@ void Main()
 }
 ```
 
-Note that calling `Context.Provide(...)` return an `IDisposable`.
+Note that calling `Context.Provide(...)` returns an `IDisposable`.
 It's very important to wrap it in a `using` statement because its `Dispose()` method is responsible for popping the current instance off the stack.
 
 When dealing with multiple provided contexts of the same type, `Context.Use<T>()` always resolves the instance which is nearest on the callstack.
@@ -106,7 +106,7 @@ using (Context.Provide(new MyContext("foo")))
 }
 ```
 
-Context are stacked separately depending on their type, so you can compose them as well:
+Moreover, contexts are persisted on different stacks depending on their type. An operation may depend on contexts of multiple types at the same time:
 
 ```csharp
 using (Context.Provide(new FooContext("foo")))
