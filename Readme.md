@@ -40,20 +40,20 @@ class MyContext : Context
 }
 ```
 
-This class has two constructors: one which initializes `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
-The first constructor will be used when we need to create an instance of the context normally, while the second (parameterless) one is required so that the library can create a fallback instance in case we don't provide one explicitly.
+This class has two constructors: one which sets `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
+The first constructor will be used when we need to initialize the context normally, while the second (parameterless) constructor is going to be called by the library to create a fallback in case we don't provide an instance explicitly.
 
 > Note that although forgetting to include the parameterless constructor will not raise a compilation error on the class definition itself, it will raise one when calling `Context.Use<T>(...)` thanks to a generic constraint that requires it.
 
-Then, in a method that is meant to depend on this context, call `Context.Use<MyContext>()` to resolve the nearest instance on the stack:
+Then, in a method that depends on our context, we need to call `Context.Use<MyContext>()` to resolve the nearest available instance:
 
 ```csharp
 void PrintValue()
 {
-    // Get the instance of the context.
+    // Get the instance of the context...
     
-    // The instance is guaranteed to never be null as the parameterless
-    // constructor is used to resolve a fallback if it hasn't been explicitly provided.
+    // The return is guaranteed to never be null as the parameterless constructor
+    // is used to create a fallback if an instance hasn't been explicitly provided.
     
     var ctx = Context.Use<MyContext>();
     
@@ -63,25 +63,27 @@ void PrintValue()
 }
 ```
 
-Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere in the chain that leads to `PrintValue()`:
+Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere above in the callstack:
 
 ```csharp
 void Main()
 {
     using (Context.Provide(new MyContext("Hello world!")))
     {
+        // Custom context instance is accessible within this block
         PrintValue(); // prints "Hello world!" to the console
     }
 
+    // At this point, the stack reverts back to the initial (default) instance
     PrintValue(); // prints "default" to the console
 }
 ```
 
-Note that when calling `Context.Provide(...)`, we get an `IDisposable` back.
-It's very important to wrap it in a `using` statement because its `Dispose()` method is responsible for popping the current instance off the stack, re-establishing the previous one in the process.
+Note that calling `Context.Provide(...)` return an `IDisposable`.
+It's very important to wrap it in a `using` statement because its `Dispose()` method is responsible for popping the current instance off the stack.
 
-When dealing with multiple provided contexts of the same type, `Context.Use<T>()` will always resolve the instance which is nearest on the callstack.
-Essentially, providing a new context is a way to temporarily override the currently available instance:
+When dealing with multiple provided contexts of the same type, `Context.Use<T>()` always resolves the instance which is nearest on the callstack.
+Essentially, providing a new context temporarily shadows the previous instance:
 
 ```csharp
 using (Context.Provide(new MyContext("foo")))
@@ -104,7 +106,7 @@ using (Context.Provide(new MyContext("foo")))
 }
 ```
 
-Context are also stacked separately depending on their type, so you can easily compose them as well:
+Context are stacked separately depending on their type, so you can compose them as well:
 
 ```csharp
 using (Context.Provide(new FooContext("foo")))
@@ -124,7 +126,7 @@ using (Context.Provide(new FooContext("foo")))
 ### Sharing contexts between threads
 
 The underlying implementation in Contextual makes use of [`AsyncLocal`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1) to synchronize context stacks between threads.
-This means that if one async method provides a context and calls another async method (which may get executed on a different thread), the latter will resolve the instance as you would normally expect:
+This means that if one async method calls another async method (which may get executed on a different thread), they will both have access to the same stack:
 
 ```csharp
 async Task PrintValueAsync()
@@ -189,11 +191,11 @@ HttpClient _httpClient = new HttpClient();
 
 async Task DoSomething()
 {
-    // Retrieve cancellation implicitly
+    // Resolve cancellation implicitly
     // (if it hasn't been provided, we get a default value with an empty token)
     var cancellation = Context.Use<CancellationContext>();    
 
-    // Abort the request if the cancellation was requested upstream
+    // Pass the cancellation token to HttpClient
     using var request = new HttpRequestMessage(HttpMethod.Post, "...");
     using var response = await _httpClient.SendAsync(request, cancellation.Token);
     
@@ -245,6 +247,7 @@ void Main()
 {
     DoSomething(); // writes logs to console
 
+    // Provide a custom context to override the logger
     using (var logFile = File.CreateText("log.txt"))
     using (Context.Provide(new LogContext(logFile)))
     {
