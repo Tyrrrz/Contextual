@@ -45,7 +45,7 @@ The first constructor will be used when we need to initialize the context normal
 
 > Note that although forgetting to include the parameterless constructor will not raise a compilation error on the class definition itself, it will raise one when calling `Context.Use<T>(...)` thanks to a generic constraint that requires it.
 
-Then, in a method that depends on our context, we need to call `Context.Use<MyContext>()` to resolve the nearest available instance:
+Then, in a method that depends on our context, call `Context.Use<MyContext>()` to resolve the nearest available instance:
 
 ```csharp
 void PrintValue()
@@ -63,7 +63,7 @@ void PrintValue()
 }
 ```
 
-Finally, to provide a specific instance of the context, we can call `Context.Provide(...)` somewhere above in the callstack:
+Finally, to provide a specific instance of the context, call `Context.Provide(...)` somewhere above in the callstack:
 
 ```csharp
 void Main()
