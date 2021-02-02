@@ -24,7 +24,7 @@ Contexts are somewhat similar to exceptions in the sense that they can implicitl
 
 ### Providing and using contexts
 
-To define a custom context, create a class that inherits from the abstract `Context` class as shown below:
+To define a custom context, create a class that inherits from the abstract `Context` class as shown here:
 
 ```csharp
 // A simple context that exposes a single string value
@@ -80,7 +80,7 @@ void Main()
 ```
 
 Calling `Context.Provide(...)` pushes a new instance of the context on the stack, which makes it available to nested operations.
-Note that this returns an `IDisposable` which you must wrap in a `using` statement to ensure that the context gets resets to the previous instance at the end of the block.
+Note that this returns an `IDisposable` which you must wrap in a `using` statement to ensure that the context gets reset to the previous instance at the end of the block.
 
 When dealing with multiple provided contexts of the same type, `Context.Use<T>()` always resolves the instance which is nearest on the callstack.
 Essentially, providing a new context temporarily shadows the previous instance:
