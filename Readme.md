@@ -411,8 +411,8 @@ public void Log(string message)
     // Otherwise, provide a context for other operations
     using (Context.Provide(new IsLoggingContext(true)))
     {
-        // Write the logs to a file
-        File.AppendText(...);
+        // Write the message to a file
+        File.AppendAllText("log.txt", message);
         
         // And also call some other method
         DoSomethingElse();
