@@ -216,11 +216,12 @@ async Task Main()
 }
 ```
 
-> Note, Contextual already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own. The example above is just for reference.
+> Note, Contextual already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
+The example above is just for reference.
 
 ### Example: using contexts for logging
 
-Similarly, contexts can also be used for a logging implementation that does not require passing `ILogger` around:
+Similarly, contexts can also be used for a logging abstraction that does not require explicitly passing `ILogger` around:
 
 ```csharp
 class LogContext : Context
@@ -363,5 +364,68 @@ void Test()
         // Uses fake dependencies
         DoSomething();
     }
+}
+```
+
+Although resolving services through a static API may remind you of the [_service locator_](https://en.wikipedia.org/wiki/Service_locator_pattern) anti-pattern, it is actually different.
+The main advantage of this approach is that the dependency container is not shared globally, but is instead isolated in a context instance local to the current operation.
+
+### Example: using contexts to track recursion
+
+Contexts are particularly useful when dealing with recursive operations.
+For example, we can establish a context that would help us prevent [_indirect recursion_](https://en.wikipedia.org/wiki/Mutual_recursion) when calling a specific method:
+
+```csharp
+public class IsLoggingContext : Context
+{
+    public bool IsLogging { get; }
+    
+    public IsLoggingContext(bool isLogging) =>
+        IsLogging = isLogging;
+        
+    public IsLoggingContext() : this(false) {}
+}
+
+public void Log(string message)
+{
+    // Imagine this is a very complex logging method
+    // that also relays calls to some other methods.
+    
+    // It's possible those other methods will in turn
+    // attempt to log something as well, which will enter
+    // a recursive chain that's likely going to end in
+    // a stack overflow exception.
+    
+    // To prevent this, we can use a context to indicate whether
+    // this method has been called recursively and make an early
+    // return if so.
+    
+    var ctx = Context.Use<IsLoggingContext>();
+    
+    // Already logging? Return early
+    if (ctx.IsLogging)
+    {
+        return;
+    }
+    
+    // Otherwise, provide a context for other operations
+    using (Context.Provide(new IsLoggingContext(true)))
+    {
+        // Write the logs to a file
+        File.AppendText(...);
+        
+        // And also call some other method
+        DoSomethingElse();
+    }
+}
+
+public void DoSomethingElse()
+{
+    // Do stuff
+    // ...
+    
+    // This message will NOT be logged if `DoSomethingElse()` is
+    // called from `Log(...)` recursively.
+    Log("Did stuff successfully");
 }
 ```
