@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Contextual.Internal;
+using Contextual.Utils;
 
 namespace Contextual
 {

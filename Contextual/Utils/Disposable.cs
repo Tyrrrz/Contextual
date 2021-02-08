@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Contextual.Internal
+namespace Contextual.Utils
 {
     internal partial class Disposable : IDisposable
     {
