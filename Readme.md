@@ -15,7 +15,7 @@ Inspired by React's [Context API](https://reactjs.org/docs/context.html), which 
 
 ## Download
 
-- [NuGet](https://nuget.org/packages/Contextual): `dotnet add package Contextual`
+📦 [NuGet](https://nuget.org/packages/Contextual): `dotnet add package Contextual`
 
 ## Usage
 
