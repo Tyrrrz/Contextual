@@ -59,7 +59,7 @@ void PrintValue()
     
     Console.WriteLine(ctx.Value);
     
-    // (we'll see how the instance is provided in the following sample)
+    // (we'll see how to provide a context instance in the following sample)
 }
 ```
 
@@ -168,7 +168,7 @@ async Task ContextualAsync()
 ### Example: using contexts for cancellation
 
 Contexts are generally very useful for propagating infrastructural concerns across long chain of method calls.
-One such example is propagating cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, we can simply establish a shared context.
+One such example is propagating cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, you can simply establish a shared context.
 
 To do that, create a context that encapsulates a cancellation token:
 
@@ -216,7 +216,7 @@ async Task Main()
 }
 ```
 
-> Note, Contextual already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
+> Note that Contextual already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
 The example above is just for reference.
 
 ### Example: using contexts for logging
@@ -262,7 +262,7 @@ void Main()
 Normally, non-deterministic inputs can be quite difficult to test.
 For example, when dealing with the current system time, a common approach is to establish some kind of `IDateTimeProvider` abstraction that has two implementations: a real one for production usage and a fake one that allows us to substitute a constant value for testing purposes.
 
-Instead, contexts offer us a much simpler solution to that problem:
+Instead, contexts can offer a much simpler solution to that problem:
 
 ```csharp
 class DateTimeContext : Context
@@ -304,7 +304,7 @@ void Test()
 
 ### Example: using contexts for dependency injection
 
-We can also utilize this approach to facilitate dependency injection:
+Contexts can also be used as an alternative way to facilitate dependency injection:
 
 ```csharp
 // This implementation uses Microsoft.Extensions.DependencyInjection container,
@@ -367,13 +367,13 @@ void Test()
 }
 ```
 
-Although resolving services through a static API may remind you of the [_service locator_](https://en.wikipedia.org/wiki/Service_locator_pattern) anti-pattern, it is actually different.
-The main advantage of this approach is that the dependency container is not shared globally, but is instead isolated in a context instance local to the current operation.
+Although resolving services as shown above may remind you of the [_service locator_](https://en.wikipedia.org/wiki/Service_locator_pattern) anti-pattern, there is an important difference.
+When using contexts, the dependency container is not shared globally, but is instead isolated within a scope local to a specific operation, which makes it safe and easily overridable.
 
 ### Example: using contexts to track recursion
 
-Contexts are particularly useful when dealing with recursive operations.
-For example, we can establish a context that would help us prevent [_indirect recursion_](https://en.wikipedia.org/wiki/Mutual_recursion) when calling a specific method:
+Contexts are also particularly useful when dealing with recursive call chains.
+As an example, here's how you can use a context to prevent [_indirect recursion_](https://en.wikipedia.org/wiki/Mutual_recursion) when calling a specific method:
 
 ```csharp
 public class IsLoggingContext : Context
