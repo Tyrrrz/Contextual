@@ -11,7 +11,7 @@
 Contextual is a library that helps share data between operations executing on the same callstack.
 It offers a robust and easily testable way to facilitate _implicit parameters_ in your code.
 
-Inspired by React's [Context API](https://reactjs.org/docs/context.html), which uses a similar approach for threading contextual data through component hierarchies.
+Inspired by React's [Context API](https://reactjs.org/docs/context.html), which uses a similar approach for threading data through component hierarchies.
 
 ## Download
 
@@ -19,12 +19,12 @@ Inspired by React's [Context API](https://reactjs.org/docs/context.html), which 
 
 ## Usage
 
-This library allows you to establish _contexts_, which encapsulate data (or state) that can be provided and consumed on the callstack.
-Contexts are somewhat similar to exceptions in the sense that they can implicitly move through the callstack, but instead of being thrown from below and caught from above, they are provided from above and consumed from below.
+This library allows you to establish _contexts_ which encapsulate data (or state) that can be provided and consumed by methods executing on the same callstack.
+Contexts are somewhat similar to exceptions in the sense that they can move through the callstack, but instead of being thrown from below and caught from above, they are provided from above and consumed from below.
 
 ### Providing and using contexts
 
-To define a custom context, create a class that inherits from the abstract `Context` class as shown here:
+To define a context, create a class that inherits from the `Context` class as shown here:
 
 ```csharp
 // A simple context that exposes a single string value
@@ -40,12 +40,12 @@ class MyContext : Context
 }
 ```
 
-This class has two constructors: one which sets `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
-By design, there must always be a valid instance of the context available on the callstack, so if one has not been explicitly provided, the library will use the parameterless constructor to initialize it.
+The above class has two constructors: one which sets `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
+By design, there must always be a valid instance of the context available, so if one has not been explicitly provided the library will use the parameterless constructor to initialize it.
 
 > Note that although forgetting to include the parameterless constructor will not raise a compilation error on the class definition itself, it will raise one when calling `Context.Use<T>(...)` later, thanks to a generic constraint that requires it.
 
-Then, in a method which is meant to depend on this context, call `Context.Use<MyContext>()` to resolve the nearest available instance:
+Once the context has been defined, you can then call `Context.Use<MyContext>()` anywhere in your code to resolve the nearest available instance:
 
 ```csharp
 void PrintValue()
@@ -58,12 +58,10 @@ void PrintValue()
     var ctx = Context.Use<MyContext>();
     
     Console.WriteLine(ctx.Value);
-    
-    // (we'll see how to provide a context instance in the following sample)
 }
 ```
 
-Finally, to provide a specific instance of the context, call `Context.Provide(...)` somewhere above in the callstack:
+Finally, to provide a specific instance of the context, call `Context.Provide(...)` at some point above in the callstack:
 
 ```csharp
 void Main()
@@ -83,7 +81,7 @@ Calling `Context.Provide(...)` pushes a new instance of the context on the stack
 Note that this returns an `IDisposable` which you must wrap in a `using` statement to ensure that the context gets reset to the previous instance at the end of the block.
 
 When dealing with multiple provided contexts of the same type, `Context.Use<T>()` always resolves the instance which is nearest on the callstack.
-Essentially, providing a new context temporarily shadows the previous instance:
+In essence, providing a new context temporarily overrides the previous instance:
 
 ```csharp
 using (Context.Provide(new MyContext("foo")))
@@ -106,7 +104,8 @@ using (Context.Provide(new MyContext("foo")))
 }
 ```
 
-Additionally, contexts are persisted on different stacks depending on their type. A single operation may depend on contexts of multiple types simultaneously:
+Additionally, contexts are persisted on separate stacks depending on the type.
+A single operation may depend on contexts of multiple different types simultaneously:
 
 ```csharp
 using (Context.Provide(new FooContext("foo")))
@@ -368,7 +367,7 @@ void Test()
 ```
 
 Although resolving services as shown above may remind you of the [_service locator_](https://en.wikipedia.org/wiki/Service_locator_pattern) anti-pattern, there is an important difference.
-When using contexts, the dependency container is not shared globally, but is instead isolated within a scope local to a specific operation, which makes it safe and easily overridable.
+When using contexts, the dependency container is not shared globally, but is instead isolated within a scope local to a specific operation.
 
 ### Example: using contexts to track recursion
 
