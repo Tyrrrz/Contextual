@@ -8,7 +8,7 @@
 
 ✅ **Project status: active**.
 
-Contextual is a library that helps share data between operations executing on the same callstack.
+Contextual is a library that helps share data between operations executing within the same logical scope.
 It offers a robust and easily testable way to facilitate _implicit parameters_ in your code.
 
 Inspired by React's [Context API](https://reactjs.org/docs/context.html), which uses a similar approach for threading data through component hierarchies.
@@ -40,12 +40,12 @@ class MyContext : Context
 }
 ```
 
-The above class has two constructors: one which sets `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
-By design, there must always be a valid instance of the context available, so if one has not been explicitly provided the library will use the parameterless constructor to initialize it.
+The above type has two constructors: one which sets `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
+By design, there must always be a valid instance of the context available, so if one has not been explicitly provided, the library will use the parameterless constructor to initialize it.
 
 > Note that although forgetting to include the parameterless constructor will not raise a compilation error on the class definition itself, it will raise one when calling `Context.Use<T>(...)` later, thanks to a generic constraint that requires it.
 
-Once the context has been defined, you can then call `Context.Use<MyContext>()` anywhere in your code to resolve the nearest available instance:
+Once the context has been defined, you can then call `Context.Use<MyContext>()` to resolve its nearest available instance:
 
 ```csharp
 void PrintValue()
@@ -61,27 +61,27 @@ void PrintValue()
 }
 ```
 
-Finally, to provide a specific instance of the context, call `Context.Provide(...)` at some point above in the callstack:
+Finally, to provide a specific instance of the context, call `Context.Provide(...)` somewhere above in the callstack:
 
 ```csharp
 void Main()
 {
     using (Context.Provide(new MyContext("Hello world!")))
     {
-        // Custom context instance is accessible within this block
+        // Custom context instance is accessible within this scope
         PrintValue(); // prints "Hello world!" to the console
     }
 
-    // At this point, the stack reverts back to the initial (default) instance
+    // At this point, the context reverts back to the initial (default) instance
     PrintValue(); // prints "default" to the console
 }
 ```
 
-Calling `Context.Provide(...)` pushes a new instance of the context on the stack, which makes it available to nested operations.
-Note that this returns an `IDisposable` which you must wrap in a `using` statement to ensure that the context gets reset to the previous instance at the end of the block.
+Calling `Context.Provide(...)` pushes a new instance of the context, which makes it available to nested operations.
+Note that this returns an `IDisposable` which you must wrap in a `using` statement to ensure that the current context gets reset to the previous instance at the end of the scope.
 
-When dealing with multiple provided contexts of the same type, `Context.Use<T>()` always resolves the instance which is nearest on the callstack.
-In essence, providing a new context temporarily overrides the previous instance:
+When dealing with multiple contexts of the same type, `Context.Use<T>()` always resolves the most recently provided instance.
+Essentially, pushing a new context overrides the previous instance for the lifespan of the scope:
 
 ```csharp
 using (Context.Provide(new MyContext("foo")))
@@ -104,13 +104,13 @@ using (Context.Provide(new MyContext("foo")))
 }
 ```
 
-Additionally, contexts are persisted on separate stacks depending on the type.
+Contexts are also persisted separately depending on their type.
 A single operation may depend on contexts of multiple different types simultaneously:
 
 ```csharp
 using (Context.Provide(new FooContext("foo")))
 {
-    // This context is of a different type, so it's persisted on a separate stack
+    // This context is of a different type, so it's persisted separately
     using (Context.Provide(new BarContext(42)))
     {
         using (Context.Provide(new FooContext("baz")))
@@ -124,8 +124,8 @@ using (Context.Provide(new FooContext("foo")))
 
 ### Sharing contexts between threads
 
-The underlying implementation in Contextual makes use of [`AsyncLocal`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1) to synchronize context stacks between threads.
-This means that if one async method calls another async method (which may get executed on a different thread), they will both have access to the same stack:
+The underlying implementation makes use of [`AsyncLocal`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1) to synchronize contexts between threads.
+This means that if one async method calls another async method, they will both have access to the same contexts, even if they end up executing on different threads:
 
 ```csharp
 async Task PrintValueAsync()
@@ -164,7 +164,9 @@ async Task ContextualAsync()
 }
 ```
 
-### Example: using contexts for cancellation
+### Example usages
+
+#### Using contexts for cancellation
 
 Contexts are generally very useful for propagating infrastructural concerns across long chain of method calls.
 One such example is propagating cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, you can simply establish a shared context.
@@ -218,7 +220,7 @@ async Task Main()
 > Note that Contextual already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
 The example above is just for reference.
 
-### Example: using contexts for logging
+#### Using contexts for logging
 
 Similarly, contexts can also be used for a logging abstraction that does not require explicitly passing `ILogger` around:
 
@@ -256,7 +258,7 @@ void Main()
 }
 ```
 
-### Example: using contexts for non-deterministic inputs
+#### Using contexts for non-deterministic inputs
 
 Normally, non-deterministic inputs can be quite difficult to test.
 For example, when dealing with the current system time, a common approach is to establish some kind of `IDateTimeProvider` abstraction that has two implementations: a real one for production usage and a fake one that allows us to substitute a constant value for testing purposes.
@@ -301,7 +303,7 @@ void Test()
 }
 ```
 
-### Example: using contexts for dependency injection
+#### Using contexts for dependency injection
 
 Contexts can also be used as an alternative way to facilitate dependency injection:
 
@@ -369,7 +371,7 @@ void Test()
 Although resolving services as shown above may remind you of the [_service locator_](https://en.wikipedia.org/wiki/Service_locator_pattern) anti-pattern, there is an important difference.
 When using contexts, the dependency container is not shared globally, but is instead isolated within a scope local to a specific operation.
 
-### Example: using contexts to track recursion
+#### Using contexts to track recursion
 
 Contexts are also particularly useful when dealing with recursive call chains.
 As an example, here's how you can use a context to prevent [_indirect recursion_](https://en.wikipedia.org/wiki/Mutual_recursion) when calling a specific method:
