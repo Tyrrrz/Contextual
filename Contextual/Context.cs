@@ -1,8 +1,4 @@
-﻿using System;
-using System.Threading;
-using Contextual.Utils;
-
-namespace Contextual
+﻿namespace Contextual
 {
     /// <summary>
     /// Represents an abstract context.
@@ -20,15 +16,12 @@ namespace Contextual
         /// <remarks>
         /// Remember to wrap the return of this method in a <code>using</code> statement!
         /// </remarks>
-        public static IDisposable Provide<T>(T context) where T : Context
+        public static ContextScope<T> Provide<T>(T context) where T : Context
         {
-            var previous = Container<T>.Current.Value;
-            Container<T>.Current.Value = context;
+            var previousContext = ContextContainer<T>.Current.Value;
+            ContextContainer<T>.Current.Value = context;
 
-            return Disposable.Create(() =>
-            {
-                Container<T>.Current.Value = previous;
-            });
+            return new ContextScope<T>(context, previousContext);
         }
 
         /// <summary>
@@ -37,14 +30,6 @@ namespace Contextual
         /// parameterless constructor on the class.
         /// </summary>
         public static T Use<T>() where T : Context, new() =>
-            Container<T>.Current.Value ?? new T();
-    }
-
-    public partial class Context
-    {
-        private static class Container<T> where T : Context
-        {
-            public static AsyncLocal<T?> Current { get; } = new();
-        }
+            ContextContainer<T>.Current.Value ?? new T();
     }
 }
