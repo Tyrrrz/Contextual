@@ -24,7 +24,7 @@ Contexts are somewhat similar to exceptions in the sense that they can move thro
 
 ### Providing and using contexts
 
-To define a context, create a class that inherits from the `Context` class as shown here:
+To define a context, create a class that inherits from the `Context` type as shown below:
 
 ```csharp
 // A simple context that exposes a single string value
@@ -40,12 +40,14 @@ class MyContext : Context
 }
 ```
 
-The above type has two constructors: one which sets `Value` based on the given parameter, and another parameterless constructor that sets it to `"default"`.
-By design, there must always be a valid instance of the context available, so if one has not been explicitly provided, the library will use the parameterless constructor to initialize it.
+Note that a typical context will usually have two constructors:
 
-> Note that although forgetting to include the parameterless constructor will not raise a compilation error on the class definition itself, it will raise one when calling `Context.Use<T>(...)` later, thanks to a generic constraint that requires it.
+- Primary constructor that initializes the object with the provided value(s)
+- Fallback (parameterless) constructor that initializes the object with default value(s)
 
-Once the context has been defined, you can then call `Context.Use<MyContext>()` to resolve its nearest available instance:
+The fallback constructor is required by the library as it's used to guarantee that a valid instance of the context is always available, even if it hasn't been explicitly provided.
+
+Once defined, an instance of the context can be resolved by calling `Context.Use<MyContext>()`:
 
 ```csharp
 void PrintValue()
@@ -61,7 +63,7 @@ void PrintValue()
 }
 ```
 
-Finally, to provide a specific instance of the context, call `Context.Provide(...)` somewhere above in the callstack:
+To provide a specific instance of the context, call `Context.Provide(...)`:
 
 ```csharp
 void Main()
@@ -77,11 +79,11 @@ void Main()
 }
 ```
 
-Calling `Context.Provide(...)` pushes a new instance of the context, which makes it available to nested operations.
-Note that this returns an `IDisposable` which you must wrap in a `using` statement to ensure that the current context gets reset to the previous instance at the end of the scope.
+Calling `Context.Provide(...)` pushes a new instance of the context, which makes it available to subsequent operations.
+This returns an `IDisposable` object that you must wrap in a `using` statement to designate the scope in which this context instance can be resolved.
+Once the execution reaches the end of the scope, the context gets reset to the previously provided (or default) instance.
 
-When dealing with multiple contexts of the same type, `Context.Use<T>()` always resolves the most recently provided instance.
-Essentially, pushing a new context overrides the previous instance for the lifespan of the scope:
+Additionally, `Context.Provide(...)` can be called multiple times to create nested scopes:
 
 ```csharp
 using (Context.Provide(new MyContext("foo")))
@@ -104,8 +106,7 @@ using (Context.Provide(new MyContext("foo")))
 }
 ```
 
-Contexts are also persisted separately depending on their type.
-A single operation may depend on contexts of multiple different types simultaneously:
+Contexts are also persisted separately depending on their type, which allows a single operation to depend on contexts of multiple types simultaneously:
 
 ```csharp
 using (Context.Provide(new FooContext("foo")))
@@ -124,8 +125,8 @@ using (Context.Provide(new FooContext("foo")))
 
 ### Sharing contexts between threads
 
-The underlying implementation makes use of [`AsyncLocal`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1) to synchronize contexts between threads.
-This means that if one async method calls another async method, they will both have access to the same contexts, even if they end up executing on different threads:
+The underlying implementation in Contextual makes use of [`AsyncLocal`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1) to synchronize contexts between threads.
+This means that if one async method calls another async method, they will both have access to the same contexts, even if they end up executing on separate threads:
 
 ```csharp
 async Task PrintValueAsync()
@@ -169,7 +170,7 @@ async Task ContextualAsync()
 #### Using contexts for cancellation
 
 Contexts are generally very useful for propagating infrastructural concerns across long chain of method calls.
-One such example is propagating cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, you can simply establish a shared context.
+One such example is cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, you can simply establish a shared context.
 
 To do that, create a context that encapsulates a cancellation token:
 
@@ -185,7 +186,7 @@ class CancellationContext : Context
 }
 ```
 
-And then make use of it as shown here:
+And then consume it inside a cancellable operation:
 
 ```csharp
 HttpClient _httpClient = new HttpClient();
@@ -222,7 +223,7 @@ The example above is just for reference.
 
 #### Using contexts for logging
 
-Similarly, contexts can also be used for a logging abstraction that does not require explicitly passing `ILogger` around:
+Similarly, contexts can also be used for a logging mechanism that does not require explicitly passing `ILogger` around:
 
 ```csharp
 class LogContext : Context
@@ -261,9 +262,9 @@ void Main()
 #### Using contexts for non-deterministic inputs
 
 Normally, non-deterministic inputs can be quite difficult to test.
-For example, when dealing with the current system time, a common approach is to establish some kind of `IDateTimeProvider` abstraction that has two implementations: a real one for production usage and a fake one that allows us to substitute a constant value for testing purposes.
+For example, when retrieving current system time, a common approach is to establish some kind of `IDateTimeProvider` abstraction that has two implementations: a real one for production usage and a fake one that allows us to substitute a constant value for testing purposes.
 
-Instead, contexts can offer a much simpler solution to that problem:
+Instead, contexts can offer a simpler alternative:
 
 ```csharp
 class DateTimeContext : Context
@@ -305,7 +306,7 @@ void Test()
 
 #### Using contexts for dependency injection
 
-Contexts can also be used as an alternative way to facilitate dependency injection:
+Contexts can also be used as a way to facilitate dependency injection:
 
 ```csharp
 // This implementation uses Microsoft.Extensions.DependencyInjection container,
@@ -373,18 +374,18 @@ When using contexts, the dependency container is not shared globally, but is ins
 
 #### Using contexts to track recursion
 
-Contexts are also particularly useful when dealing with recursive call chains.
-As an example, here's how you can use a context to prevent [_indirect recursion_](https://en.wikipedia.org/wiki/Mutual_recursion) when calling a specific method:
+Because contexts are persisted in a structure that mimics the callstack, they can be used to track recursive calls.
+As an example, here's how you can use a context to prevent [_indirect recursion_](https://en.wikipedia.org/wiki/Mutual_recursion) on a specific method:
 
 ```csharp
-public class IsLoggingContext : Context
+public class RecursionContext : Context
 {
-    public bool IsLogging { get; }
+    public bool IsRecursing { get; }
     
-    public IsLoggingContext(bool isLogging) =>
-        IsLogging = isLogging;
+    public RecursionContext(bool isRecursing) =>
+        IsRecursing = isRecursing;
         
-    public IsLoggingContext() : this(false) {}
+    public RecursionContext() : this(false) {}
 }
 
 public void Log(string message)
@@ -401,16 +402,16 @@ public void Log(string message)
     // this method has been called recursively and make an early
     // return if so.
     
-    var ctx = Context.Use<IsLoggingContext>();
+    var ctx = Context.Use<RecursionContext>();
     
     // Already logging? Return early
-    if (ctx.IsLogging)
+    if (ctx.IsRecursing)
     {
         return;
     }
     
     // Otherwise, provide a context for other operations
-    using (Context.Provide(new IsLoggingContext(true)))
+    using (Context.Provide(new RecursionContext(true)))
     {
         // Write the message to a file
         File.AppendAllText("log.txt", message);
