@@ -80,10 +80,10 @@ void Main()
 ```
 
 Calling `Context.Provide(...)` pushes a new instance of the context, which makes it available to subsequent operations.
-This returns an `IDisposable` object that you must wrap in a `using` statement to designate the scope in which this context instance can be resolved.
-Once the execution reaches the end of the scope, the context gets reset to the previously provided (or default) instance.
+This returns an `IDisposable` object that you must wrap in a `using` statement to designate the scope in which the context instance can be resolved.
+Once the execution reaches the end of that scope, the context will get reset to the previously provided (or default) instance.
 
-Additionally, `Context.Provide(...)` can be called multiple times to create nested scopes:
+Additionally, `Context.Provide(...)` can be called multiple times to create scopes nested within each other:
 
 ```csharp
 using (Context.Provide(new MyContext("foo")))
@@ -170,7 +170,7 @@ async Task ContextualAsync()
 #### Using contexts for cancellation
 
 Contexts are generally very useful for propagating infrastructural concerns across long chain of method calls.
-One such example is cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, you can simply establish a shared context.
+One such example is cancellation signals: instead of routinely passing `CancellationToken` as parameter to every method, we can simply establish a shared context.
 
 To do that, create a context that encapsulates a cancellation token:
 
@@ -262,7 +262,7 @@ void Main()
 #### Using contexts for non-deterministic inputs
 
 Normally, non-deterministic inputs can be quite difficult to test.
-For example, when retrieving current system time, a common approach is to establish some kind of `IDateTimeProvider` abstraction that has two implementations: a real one for production usage and a fake one that allows us to substitute a constant value for testing purposes.
+For example, when retrieving current system time, a common approach is to establish some kind of `IDateTimeProvider` abstraction that has two implementations: one for production usage and a fake one that allows us to substitute the value for testing purposes.
 
 Instead, contexts can offer a simpler alternative:
 
@@ -369,8 +369,7 @@ void Test()
 }
 ```
 
-Although resolving services as shown above may remind you of the [_service locator_](https://en.wikipedia.org/wiki/Service_locator_pattern) anti-pattern, there is an important difference.
-When using contexts, the dependency container is not shared globally, but is instead isolated within a scope local to a specific operation.
+Although resolving services as shown above may remind you of the [_service locator_](https://en.wikipedia.org/wiki/Service_locator_pattern) anti-pattern, an important difference is that the container here is isolated within a specific scope, which prevents it from being shared globally.
 
 #### Using contexts to track recursion
 
