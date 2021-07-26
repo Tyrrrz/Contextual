@@ -4,6 +4,7 @@
 [![Coverage](https://codecov.io/gh/Tyrrrz/Contextual/branch/master/graph/badge.svg)](https://codecov.io/gh/Tyrrrz/Contextual)
 [![Version](https://img.shields.io/nuget/v/Contextual.svg)](https://nuget.org/packages/Contextual)
 [![Downloads](https://img.shields.io/nuget/dt/Contextual.svg)](https://nuget.org/packages/Contextual)
+[![Discord](https://img.shields.io/discord/869237470565392384?label=discord)](https://discord.gg/2SUWKFnHSm)
 [![Donate](https://img.shields.io/badge/donate-$$$-purple.svg)](https://tyrrrz.me/donate)
 
 ✅ **Project status: active**.
@@ -12,6 +13,8 @@ Contextual is a library that helps share data between operations executing withi
 It offers a robust and easily testable way to facilitate _implicit parameters_ in your code.
 
 Inspired by React's [Context API](https://reactjs.org/docs/context.html), which uses a similar approach for threading data through component hierarchies.
+
+💬 **If you want to chat, join my [Discord server](https://discord.gg/2SUWKFnHSm)**.
 
 ## Download
 
