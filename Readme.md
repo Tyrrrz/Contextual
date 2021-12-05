@@ -9,7 +9,7 @@
 
 ✅ **Project status: active**. [What does it mean?](https://github.com/Tyrrrz/shared/blob/master/docs/project-status.md)
 
-Contextual is a library that helps share data between operations executing within the same logical scope.
+**Contextual** is a library that helps share data between operations executing within the same logical scope.
 It offers a robust and easily testable way to facilitate _implicit parameters_ in your code.
 
 Inspired by React's [Context API](https://reactjs.org/docs/context.html), which uses a similar approach for threading data through component hierarchies.
@@ -128,7 +128,7 @@ using (Context.Provide(new FooContext("foo")))
 
 ### Sharing contexts between threads
 
-The underlying implementation in Contextual makes use of [`AsyncLocal`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1) to synchronize contexts between threads.
+The underlying implementation in **Contextual** makes use of [`AsyncLocal`](https://docs.microsoft.com/en-us/dotnet/api/system.threading.asynclocal-1) to synchronize contexts between threads.
 This means that if one async method calls another async method, they will both have access to the same contexts, even if they end up executing on separate threads:
 
 ```csharp
@@ -221,7 +221,7 @@ async Task Main()
 }
 ```
 
-> Note that Contextual already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
+> Note that **Contextual** already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
 The example above is just for reference.
 
 #### Using contexts for logging
