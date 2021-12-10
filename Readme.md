@@ -1,6 +1,6 @@
 # Contextual
 
-[![Build](https://github.com/Tyrrrz/Contextual/workflows/CI/badge.svg?branch=master)](https://github.com/Tyrrrz/Contextual/actions)
+[![Build](https://github.com/Tyrrrz/Contextual/workflows/main/badge.svg?branch=master)](https://github.com/Tyrrrz/Contextual/actions)
 [![Coverage](https://codecov.io/gh/Tyrrrz/Contextual/branch/master/graph/badge.svg)](https://codecov.io/gh/Tyrrrz/Contextual)
 [![Version](https://img.shields.io/nuget/v/Contextual.svg)](https://nuget.org/packages/Contextual)
 [![Downloads](https://img.shields.io/nuget/dt/Contextual.svg)](https://nuget.org/packages/Contextual)
