@@ -7,7 +7,7 @@
 [![Discord](https://img.shields.io/discord/869237470565392384?label=discord)](https://discord.gg/2SUWKFnHSm)
 [![Donate](https://img.shields.io/badge/donate-$$$-purple.svg)](https://tyrrrz.me/donate)
 
-✅ **Project status: active**. [What does it mean?](https://github.com/Tyrrrz/shared/blob/master/docs/project-status.md)
+✅ **Project status: active**. [What does it mean?](https://github.com/Tyrrrz/.github/blob/master/docs/project-status.md)
 
 **Contextual** is a library that helps share data between operations executing within the same logical scope.
 It offers a robust and easily testable way to facilitate _implicit parameters_ in your code.
@@ -56,12 +56,12 @@ Once defined, an instance of the context can be resolved by calling `Context.Use
 void PrintValue()
 {
     // Get the instance of the context...
-    
+
     // The return is guaranteed to never be null as the parameterless constructor
     // is used to create a fallback if an instance hasn't been explicitly provided.
-    
+
     var ctx = Context.Use<MyContext>();
-    
+
     Console.WriteLine(ctx.Value);
 }
 ```
@@ -198,12 +198,12 @@ async Task DoSomething()
 {
     // Resolve cancellation implicitly
     // (if it hasn't been provided, we get a default value with an empty token)
-    var cancellation = Context.Use<CancellationContext>();    
+    var cancellation = Context.Use<CancellationContext>();
 
     // Pass the cancellation token to HttpClient
     using var request = new HttpRequestMessage(HttpMethod.Post, "...");
     using var response = await _httpClient.SendAsync(request, cancellation.Token);
-    
+
     // ...
 }
 
@@ -222,7 +222,7 @@ async Task Main()
 ```
 
 > Note that **Contextual** already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
-The example above is just for reference.
+> The example above is just for reference.
 
 #### Using contexts for logging
 
@@ -325,14 +325,14 @@ class DependencyContainerContext : Context
     // This constructor is used in production to register real services
     public DependencyContainerContext()
         : this(ConfigureServices()) {}
-        
+
     private static IServiceProvider ConfigureServices()
     {
         var serviceCollection = new ServiceCollection();
-        
+
         // Register real services
         serviceCollection.AddSingleton<IDependency, RealDependency>();
-        
+
         return serviceCollection.BuildServiceProvider();
     }
 }
@@ -383,10 +383,10 @@ As an example, here's how you can use a context to prevent [_indirect recursion_
 public class RecursionContext : Context
 {
     public bool IsRecursing { get; }
-    
+
     public RecursionContext(bool isRecursing) =>
         IsRecursing = isRecursing;
-        
+
     public RecursionContext() : this(false) {}
 }
 
@@ -394,30 +394,30 @@ public void Log(string message)
 {
     // Imagine this is a very complex logging method
     // that also relays calls to some other methods.
-    
+
     // It's possible those other methods will in turn
     // attempt to log something as well, which will enter
     // a recursive chain that's likely going to end in
     // a stack overflow exception.
-    
+
     // To prevent this, we can use a context to indicate whether
     // this method has been called recursively and make an early
     // return if so.
-    
+
     var ctx = Context.Use<RecursionContext>();
-    
+
     // Already logging? Return early
     if (ctx.IsRecursing)
     {
         return;
     }
-    
+
     // Otherwise, provide a context for other operations
     using (Context.Provide(new RecursionContext(true)))
     {
         // Write the message to a file
         File.AppendAllText("log.txt", message);
-        
+
         // And also call some other method
         DoSomethingElse();
     }
@@ -427,7 +427,7 @@ public void DoSomethingElse()
 {
     // Do stuff
     // ...
-    
+
     // This message will NOT be logged if `DoSomethingElse()` is
     // called from `Log(...)` recursively.
     Log("Did stuff successfully");
