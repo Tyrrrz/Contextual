@@ -4,6 +4,7 @@
     <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
     <Authors>$(Company)</Authors>
     <Description>Library for threading implicit parameters through method call chains</Description>
+    <IsPackable>true</IsPackable>
     <PackageTags>context stack dependency injection effect functional react</PackageTags>
     <PackageProjectUrl>https://github.com/Tyrrrz/Contextual</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/Tyrrrz/Contextual/blob/master/Changelog.md</PackageReleaseNotes>
