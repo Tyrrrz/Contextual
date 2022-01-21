@@ -380,7 +380,7 @@ Because contexts are persisted in a structure that mimics the callstack, they ca
 As an example, here's how you can use a context to prevent [_indirect recursion_](https://en.wikipedia.org/wiki/Mutual_recursion) on a specific method:
 
 ```csharp
-public class RecursionContext : Context
+class RecursionContext : Context
 {
     public bool IsRecursing { get; }
 
@@ -390,7 +390,7 @@ public class RecursionContext : Context
     public RecursionContext() : this(false) {}
 }
 
-public void Log(string message)
+void Log(string message)
 {
     // Imagine this is a very complex logging method
     // that also relays calls to some other methods.
@@ -423,7 +423,7 @@ public void Log(string message)
     }
 }
 
-public void DoSomethingElse()
+void DoSomethingElse()
 {
     // Do stuff
     // ...
