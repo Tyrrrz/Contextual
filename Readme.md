@@ -1,25 +1,24 @@
 # Contextual
 
-[![Build](https://github.com/Tyrrrz/Contextual/workflows/main/badge.svg?branch=master)](https://github.com/Tyrrrz/Contextual/actions)
-[![Coverage](https://codecov.io/gh/Tyrrrz/Contextual/branch/master/graph/badge.svg)](https://codecov.io/gh/Tyrrrz/Contextual)
+[![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://vshymanskyy.github.io/StandWithUkraine)
+[![Build](https://img.shields.io/github/workflow/status/Tyrrrz/Contextual/CI/master)](https://github.com/Tyrrrz/Contextual/actions)
+[![Coverage](https://img.shields.io/codecov/c/github/Tyrrrz/Contextual/master)](https://codecov.io/gh/Tyrrrz/Contextual)
 [![Version](https://img.shields.io/nuget/v/Contextual.svg)](https://nuget.org/packages/Contextual)
 [![Downloads](https://img.shields.io/nuget/dt/Contextual.svg)](https://nuget.org/packages/Contextual)
 [![Discord](https://img.shields.io/discord/869237470565392384?label=discord)](https://discord.gg/2SUWKFnHSm)
-[![Donate](https://img.shields.io/badge/donate-$$$-purple.svg)](https://tyrrrz.me/donate)
-[![Fuck Russia](https://img.shields.io/badge/fuck-russia-black.svg)](https://twitter.com/Tyrrrz/status/1495972128977571848)
+[![Donate](https://img.shields.io/badge/donate-$$$-8a2be2.svg)](https://tyrrrz.me/donate)
+[![Fuck Russia](https://img.shields.io/badge/fuck-russia-e4181c.svg?labelColor=000000)](https://twitter.com/tyrrrz/status/1495972128977571848)
 
-✅ **Project status: active**. [What does it mean?](https://github.com/Tyrrrz/.github/blob/master/docs/project-status.md)
+✅ **Project status: active**<sup>[[?]](https://github.com/Tyrrrz/.github/blob/master/docs/project-status.md)</sup>
 
 **Contextual** is a library that helps share data between operations executing within the same logical scope.
 It offers a robust and easily testable way to facilitate _implicit parameters_ in your code.
 
 Inspired by React's [Context API](https://reactjs.org/docs/context.html), which uses a similar approach for threading data through component hierarchies.
 
-💬 **If you want to chat, join my [Discord server](https://discord.gg/2SUWKFnHSm)**.
+## Install
 
-## Download
-
-📦 [NuGet](https://nuget.org/packages/Contextual): `dotnet add package Contextual`
+- 📦 [NuGet](https://nuget.org/packages/Contextual): `dotnet add package Contextual`
 
 ## Usage
 
