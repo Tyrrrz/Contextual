@@ -221,7 +221,8 @@ async Task Main()
 }
 ```
 
-> Note that **Contextual** already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
+> **Note**:
+> **Contextual** already comes with an implementation of `CancellationContext` built-in, so you don't need to create your own.
 > The example above is just for reference.
 
 #### Using contexts for logging
